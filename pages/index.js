@@ -7,7 +7,8 @@ import Web3 from "web3";
 import {
   tokenContractInstance,
   votingContractInstance,
-  operatorInstance
+  operatorInstance,
+  controllerInstance,
 } from "../service/service";
 import Proposal from "../components/Proposal";
 export default function Home() {
@@ -22,7 +23,8 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [description, setDescription] = useState(null);
   const [countProposal, setCount] = useState(null);
-const [nodeOp, setNodeOp] = useState(null);
+  const [nodeOp, setNodeOp] = useState(null);
+  const [controller, setController] = useState(null);
   const updateAddressBalance = (e) => {
     setAddressBalance(e.target.value);
   };
@@ -55,6 +57,9 @@ const [nodeOp, setNodeOp] = useState(null);
         setVotingContract(votingContractInst);
         const nodeOp = operatorInstance(web3Instance);
         setNodeOp(nodeOp);
+
+        const controller = controllerInstance(web3Instance);
+        setController(controller);
       } catch (error) {
         console.log(error);
       }
@@ -89,22 +94,32 @@ const [nodeOp, setNodeOp] = useState(null);
 
   const handleSumbitProposal = async () => {
     try {
-      const allowance = await tokenContract.methods
-        .allowance(address, votingContract._address)
-        .call();
-      console.log(Number(web3.utils.fromWei(allowance, "ether")) < 20);
-      if (Number(web3.utils.fromWei(allowance, "ether")) < 20) {
-        console.log(1);
-        await tokenContract.methods
-          .approve(votingContract._address, BigInt(20 * 10 ** 18))
-          .send({
-            from: address,
-          });
-      }
-      console.log(2);
-      await votingContract.methods.createProposal(description).send({
+      // const allowance = await tokenContract.methods
+      //   .allowance(address, votingContract._address)
+      //   .call();
+      // console.log(Number(web3.utils.fromWei(allowance, "ether")) < 20);
+      // if (Number(web3.utils.fromWei(allowance, "ether")) < 20) {
+      //   console.log(1);
+      //   await tokenContract.methods
+      //     .approve(votingContract._address, BigInt(20 * 10 ** 18))
+      //     .send({
+      //       from: address,
+      //     });
+      // }
+      // console.log(2);
+      // await votingContract.methods.createProposal(description).send({
+      //   from: address,
+      // });
+    const result = await controller.methods
+      .payFee([
+        "0xd283f3979d00cb5493f2da07819695bc299fba34aa6e0bacb484fe07a2fc0ae0",
+        "0x4659db3b248cae1bb6856ee63308af6c9c15239e3bb76f425fbacdd84bb15330",
+      ])
+      .send({
         from: address,
+        value: web3.utils.toWei("0.2", "ether"),
       });
+    console.log("result", result);
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -240,7 +255,7 @@ const [nodeOp, setNodeOp] = useState(null);
             <div className=" field">
               <label>List Proposal: {countProposal}</label>
               <div>
-                {countProposal>0 &&
+                {countProposal > 0 &&
                   Array.from({ length: countProposal }, (_, index) => {
                     return (
                       <Proposal

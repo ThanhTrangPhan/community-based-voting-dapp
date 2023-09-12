@@ -18,8 +18,6 @@ export const votingContractInstance = web3 => {
 }
 
 export const controllerInstance = (web3) => {
-    console.log(web3);
-    console.log(controller);
     return new web3.eth.Contract(
         Controller, // abi of SC token
         "0x027393deb73ff0d055f2c5769ee708faf1df0687" // address of  token

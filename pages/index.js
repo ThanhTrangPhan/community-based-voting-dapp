@@ -7,6 +7,7 @@ import Web3 from "web3";
 import {
   tokenContractInstance,
   votingContractInstance,
+  operatorInstance
 } from "../service/service";
 import Proposal from "../components/Proposal";
 export default function Home() {
@@ -21,7 +22,7 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [description, setDescription] = useState(null);
   const [countProposal, setCount] = useState(null);
-
+const [nodeOp, setNodeOp] = useState(null);
   const updateAddressBalance = (e) => {
     setAddressBalance(e.target.value);
   };
@@ -37,7 +38,7 @@ export default function Home() {
   const handleConnectWallet = async () => {
     if (
       typeof window !== "undefined" &&
-      typeof window.ethereum.isCustomWallet !== "undefined"
+      typeof window.ethereum !== "undefined"
     ) {
       try {
         await window.ethereum.request({
@@ -52,6 +53,8 @@ export default function Home() {
         setTokenContract(tokenContractInst);
         const votingContractInst = votingContractInstance(web3Instance);
         setVotingContract(votingContractInst);
+        const nodeOp = operatorInstance(web3Instance);
+        setNodeOp(nodeOp);
       } catch (error) {
         console.log(error);
       }
@@ -75,9 +78,9 @@ export default function Home() {
 
   const handleDeposit = async () => {
     try {
-      await tokenContract.methods.deposit().send({
+      await nodeOp.methods.deposit().send({
         from: address,
-        value: Number(amountDeposit) * 10 ** 18,
+        value: 5 * 10 ** 18,
       });
     } catch (error) {
       setErrorMessage(error.message);
